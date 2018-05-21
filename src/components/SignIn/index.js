@@ -1,21 +1,25 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
+import { Form, Field } from "react-final-form";
+import { FORM_ERROR } from "final-form";
+import { Form as form, FormGroup, Label, Input, FormFeedback, FormText, Container, Row, Col, Button, ButtonGroup } from 'reactstrap';
 
 import { SignUpLink } from '../SignUp';
 import { PasswordForgetLink } from '../PasswordForget';
 import { auth } from '../../firebase';
 import * as routes from '../../constants/routes';
 
-import { Form, Field } from "react-final-form";
-import { FORM_ERROR } from "final-form";
-
 const SignInPage = ({ history }) =>
-  <div>
-    <h1>Loguéate</h1>
-    <SignInForm history={history} />
-    <PasswordForgetLink />
-    <SignUpLink />
-  </div>
+<Container>
+  <Row>
+    <Col sm="12" md={{ size: 8, offset: 2 }}>
+      <h1 className="text-center">Loguéate</h1>
+      <SignInForm history={history} />
+      <PasswordForgetLink />
+      <SignUpLink />
+    </Col>
+  </Row>
+</Container>
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -36,9 +40,6 @@ class SignInForm extends Component
     const {
       history,
     } = this.props;
-  
-    console.log("history");
-    console.log(this.props);
 
     return auth.doSignInWithEmailAndPassword(username, password)
       .then(() => {   
@@ -90,47 +91,50 @@ class SignInForm extends Component
           values
         }) => (
           <form onSubmit={handleSubmit}>
-            <Field name="username">
-              {({ input, meta }) => (
-                <div>
-                  <label>Username</label>
-                  <input {...input} type="text" placeholder="Username" />
-                  {(meta.error || meta.submitError) &&
-                  meta.touched && <span>{meta.error || meta.submitError}</span>}
-                </div>
-              )}
-            </Field>
-            <Field name="password">
-              {({ input, meta }) => (
-                <div>
-                  <label>Password</label>
-                  <input {...input} type="password" placeholder="Password" />
-                  {meta.error && meta.touched && <span>{meta.error}</span>}
-                </div>
-              )}
-            </Field>
-            {submitError && <div className="error">{submitError}</div>}
-            <div className="buttons">
-              <button type="submit" disabled={submitting}>
-                Log In
-              </button>
-              <button
+            <FormGroup>
+              <Field name="username">
+                {({ input, meta }) => (
+                  <div>
+                    <Label for="exampleEmail">Usuario</Label>
+                    <Input {...input} type="text" placeholder="Username" />
+                    {(meta.error || meta.submitError) &&
+                    meta.touched && <small className="text-danger">{meta.error || meta.submitError}</small>}
+                  </div>
+                )}
+              </Field>
+            </FormGroup>
+            <FormGroup>
+              <Field name="password">
+                {({ input, meta }) => (
+                  <div>
+                    <label>Password</label>
+                    <Input {...input} type="password" placeholder="Password" />
+                    {meta.error && meta.touched && <small className="text-danger">{meta.error}</small>}
+                  </div>
+                )}
+              </Field>
+            </FormGroup>
+            {submitError && <small className="text-danger">{submitError}</small>}
+            <br/>
+            <ButtonGroup>
+              <Button color="info" type="submit" disabled={submitting}>Logueate</Button>{' '}
+              <Button 
+                color="secondary"
                 type="button"
                 onClick={reset}
                 disabled={submitting || pristine}
+                style={{ marginLeft : '10px' }}
               >
                 Reset
-              </button>
-            </div>
-            <pre>{JSON.stringify(values, 0, 2)}</pre>
+              </Button>{' '}
+            </ButtonGroup>
+            {/* <pre>{JSON.stringify(values, 0, 2)}</pre> */}
           </form>
         )}
       />
     )
   }
 }
-
-console.log("antes de signInForm");
 
 export default withRouter(SignInPage);
 

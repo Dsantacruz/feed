@@ -3,25 +3,32 @@ import {
   Link,
   withRouter,
 } from 'react-router-dom';
+import { Form, Field } from "react-final-form";
+import { FORM_ERROR } from "final-form";
+import { Form as form, FormGroup, Label, Input, FormFeedback, FormText, Container, Row, Col, Button, ButtonGroup } from 'reactstrap';
 
 import { auth, db } from '../../firebase';
 import * as routes from '../../constants/routes';
 
 const SignUpPage = ({ history }) =>
-  <div>
-    <h1>SignUp</h1>
-    <SignUpForm history={history} />
-  </div>
+<Container>
+  <Row>
+    <Col sm="12" md={{ size: 8, offset: 2 }}>
+    <h1 className="text-center">Registrarse</h1>
+      <SignUpForm history={history} />
+    </Col>
+  </Row>
+</Container>
 
 const updateByPropertyName = (propertyName, value) => () => ({
   [propertyName]: value,
 });
 
 const INITIAL_STATE = {
+  fullname: '',
   username: '',
-  email: '',
-  passwordOne: '',
-  passwordTwo: '',
+  password: '',
+  confirm_password: '',
   error: null,
 };
 
@@ -33,32 +40,47 @@ class SignUpForm extends Component {
   }
 
   onSubmit = (event) => {
+
     const {
       username,
-      email,
-      passwordOne,
+      fullname,
+      password,
     } = this.state;
-
     const {
       history,
     } = this.props;
 
-    auth.doCreateUserWithEmailAndPassword(email, passwordOne)
+    return auth.doCreateUserWithEmailAndPassword(username, password)
       .then(authUser => {
-
         // Create a user in your own accessible Firebase Database too
-        db.doCreateUser(authUser.uid, username, email)
+        db.doCreateUser(authUser.uid, fullname, username)
           .then(() => {
-            this.setState(() => ({ ...INITIAL_STATE }));
             history.push(routes.HOME);
           })
           .catch(error => {
-            this.setState(updateByPropertyName('error', error));
+            window.alert("Error al crear usuario.");
           });
 
       })
       .catch(error => {
-        this.setState(updateByPropertyName('error', error));
+        let errorCode = error.code;
+
+        let errorMessage = error.message;
+
+        if(errorCode === 'auth/email-already-in-use')
+        {
+          return { username : 'El email ya se encuentra registrado, intenta con otro' }
+        }
+
+        if(errorCode === 'operation-not-allowed')
+        {
+          return { username : 'Las cuentas no se encuentra habilitadas' }
+        }
+
+        if(errorCode === 'auth/weak-password')
+        {
+          return { password : 'La contraseña es muy débil, intenta una nueva' }
+        }
       });
 
     event.preventDefault();
@@ -66,21 +88,114 @@ class SignUpForm extends Component {
 
   render() {
     const {
+      fullname,
       username,
-      email,
-      passwordOne,
-      passwordTwo,
+      password,
+      confirm_password,
       error,
     } = this.state;
 
     const isInvalid =
-      passwordOne !== passwordTwo ||
-      passwordOne === '' ||
-      username === '' ||
-      email === '';
+      password !== confirm_password ||
+      password === '' ||
+      fullname === '' ||
+      username === '';
 
     return (
-      <form onSubmit={this.onSubmit}>
+      <Form
+        onSubmit={this.onSubmit}
+        render={({
+          submitError,
+          handleSubmit,
+          reset,
+          submitting,
+          pristine,
+        }) => (
+          <form onSubmit={handleSubmit}>
+            <FormGroup>
+              <Field name="fullname">
+                {({ input, meta }) => (
+                  <div>
+                    <Label for="fullname">Nombres completos</Label>
+                    <Input 
+                      {...input} 
+                      type="text" 
+                      placeholder="Nombres completos" 
+                      value={fullname}
+                      onChange={event => this.setState(updateByPropertyName('fullname', event.target.value))}
+                    />
+                    {(meta.error || meta.submitError) &&
+                    meta.touched && <small className="text-danger">{meta.error || meta.submitError}</small>}
+                  </div>
+                )}
+              </Field>
+            </FormGroup>
+            <FormGroup>
+              <Field name="username">
+                {({ input, meta }) => (
+                  <div>
+                    <Label for="username">Usuario</Label>
+                    <Input 
+                      {...input} 
+                      type="text" 
+                      placeholder="Ingresar email" 
+                      value={username}
+                      onChange={event => this.setState(updateByPropertyName('username', event.target.value))}
+                    />
+                    {(meta.error || meta.submitError) &&
+                    meta.touched && <small className="text-danger">{meta.error || meta.submitError}</small>}
+                  </div>
+                )}
+              </Field>
+            </FormGroup>
+            <FormGroup>
+              <Field name="password">
+                {({ input, meta }) => (
+                  <div>
+                    <Label for="password">Password</Label>
+                    <Input 
+                      {...input} 
+                      type="password" 
+                      placeholder="Password" 
+                      value={password}  
+                      onChange={event => this.setState(updateByPropertyName('password', event.target.value))}
+                    />
+                    {meta.error && meta.touched && <small className="text-danger">{meta.error}</small>}
+                  </div>
+                )}
+              </Field>
+            </FormGroup>
+            <FormGroup>
+              <Field name="confirm_password">
+                {({ input, meta }) => (
+                  <div>
+                    <label>Confirmar Password</label>
+                    <Input 
+                      {...input} 
+                      type="password" 
+                      placeholder="Confirmar password" 
+                      value={confirm_password}
+                      onChange={event => this.setState(updateByPropertyName('confirm_password', event.target.value))}
+                    />
+                    {meta.error && meta.touched && <small className="text-danger">{meta.error}</small>}
+                  </div>
+                )}
+              </Field>
+            </FormGroup>
+            {submitError && <small className="text-danger">{submitError}</small>}
+            <br/>
+            <ButtonGroup>
+              <Button 
+                color="info" 
+                type="submit" 
+                disabled={isInvalid}
+              >Registrarse</Button>{' '}
+            </ButtonGroup>
+            {/* <pre>{JSON.stringify(values, 0, 2)}</pre> */}
+          </form>
+        )}
+      />
+      /*<form onSubmit={this.onSubmit}>
         <input
           value={username}
           onChange={event => this.setState(updateByPropertyName('username', event.target.value))}
@@ -110,16 +225,16 @@ class SignUpForm extends Component {
         </button>
 
         { error && <p>{error.message}</p> }
-      </form>
+      </form>*/
     );
   }
 }
 
 const SignUpLink = () =>
   <p>
-    Don't have an account?
+    ¿Aún no tienes una cuenta?
     {' '}
-    <Link to={routes.SIGN_UP}>Sign Up</Link>
+    <Link to={routes.SIGN_UP}>Regístrate</Link>
   </p>
 
 export default withRouter(SignUpPage);
