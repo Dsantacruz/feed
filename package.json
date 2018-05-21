@@ -1,12 +1,14 @@
 {
-  "name": "react-redux-firebase-authentication",
+  "name": "feed",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "final-form": "^4.6.1",
     "firebase": "^4.3.1",
     "prop-types": "^15.5.10",
     "react": "^16.1.1",
     "react-dom": "^16.1.1",
+    "react-final-form": "^3.4.2",
     "react-redux": "^5.0.6",
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.0.17",
