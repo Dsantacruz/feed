@@ -42,8 +42,8 @@ class SignInForm extends Component
     } = this.props;
 
     return auth.doSignInWithEmailAndPassword(username, password)
-      .then(() => {   
-        history.push(routes.HOME);
+      .then((data) => {   
+        history.push(routes.FEED);
       })
       .catch(error => {
         let errorCode = error.code;
@@ -133,6 +133,13 @@ class SignInForm extends Component
         )}
       />
     )
+  }
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    dispatch1: (user) => {
+    }
   }
 }
 

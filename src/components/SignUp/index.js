@@ -55,7 +55,7 @@ class SignUpForm extends Component {
         // Create a user in your own accessible Firebase Database too
         db.doCreateUser(authUser.uid, fullname, username)
           .then(() => {
-            history.push(routes.HOME);
+            history.push(routes.FEED);
           })
           .catch(error => {
             window.alert("Error al crear usuario.");

@@ -1,9 +1,16 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'recompose';
+import { Jumbotron, Button } from 'reactstrap';
+import AddFeed from './addFeed';
+import ContainerFeed from './containerFeed';
 
 import withAuthorization from '../Session/withAuthorization';
 import { db } from '../../firebase';
+
+import {
+  userSet
+} from '../../actions/aSignIn';
 
 class HomePage extends Component {
   componentDidMount() {
@@ -15,14 +22,19 @@ class HomePage extends Component {
   }
 
   render() {
-    const { users } = this.props;
+    const { users, session } = this.props;
+
+    console.log("session");
+    console.log(session);
 
     return (
       <div>
-        <h1>Home</h1>
-        <p>The Home Page is accessible by every signed in user.</p>
+        <h1>Feed</h1>
+        <p>Bienvenido: {session.email}</p>
+        <AddFeed/>
+        <ContainerFeed/>
 
-        { !!users && <UserList users={users} /> }
+        {/* { !!users && <UserList users={users} /> } */}
       </div>
     );
   }
@@ -40,10 +52,11 @@ const UserList = ({ users }) =>
 
 const mapStateToProps = (state) => ({
   users: state.userState.users,
+  session: state.sessionState.authUser,
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  onSetUsers: (users) => dispatch({ type: 'USERS_SET', users }),
+  onSetUsers: (users) => dispatch(userSet(users)),
 });
 
 const authCondition = (authUser) => !!authUser;
